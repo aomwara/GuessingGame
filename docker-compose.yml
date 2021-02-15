@@ -1,6 +1,7 @@
 version: "3.8"
 services:
   frontend:
+    container_name: GuessingGame-FE
     stdin_open: true
     build:
      context: ./frontend
@@ -10,3 +11,12 @@ services:
     volumes:
      - "/app/node_modules"
      - "./frontend:/app"
+  
+  backend:
+    container_name: GuessingGame-BE
+    build:
+     context: ./backend
+     dockerfile: Dockerfile
+    ports:
+     - "8080:80"
+    restart: unless-stopped
