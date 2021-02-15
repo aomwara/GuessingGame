@@ -1,29 +1,77 @@
 package main
 
 import (
-    "fmt"
-    "net/http"
-    
-    "github.com/gorilla/mux"
+	"log"
+	"math/rand"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+)
+
+var (
+	route = gin.Default()
 )
 
 func main() {
-    r := mux.NewRouter()
+	var number = rand.Intn(100)
 
-    r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "<h1>This is the homepage. Try /hello and /hello/Sammy\n</h1>")
-    })
+	route.POST("/login", Login)
+	route.GET("/getNumber", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"number": number,
+		})
+		number = rand.Intn(100)
+	})
 
-    r.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "<h1>Hello from Docker!\n</h1>")
-    })
+	log.Fatal(route.Run(":8080"))
+}
 
-    r.HandleFunc("/hello/{name}", func(w http.ResponseWriter, r *http.Request) {
-        vars := mux.Vars(r)
-        title := vars["name"]
+type User struct {
+	ID       uint64 `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Phone    string `json:"phone"`
+}
 
-        fmt.Fprintf(w, "<h1>Hello from go, %s!\n</h1>", title)
-    })
+var user = User{
+	ID:       1,
+	Username: "test",
+	Password: "testuser",
+}
 
-    http.ListenAndServe(":80", r)
+func Login(c *gin.Context) {
+	var u User
+	if err := c.ShouldBindJSON(&u); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
+		return
+	}
+	//compare the user from the request, with the one we defined:
+	if user.Username != u.Username || user.Password != u.Password {
+		c.JSON(http.StatusUnauthorized, "Please provide valid login details")
+		return
+	}
+	token, err := CreateToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, token)
+}
+
+func CreateToken(userId uint64) (string, error) {
+	var err error
+	os.Setenv("ACCESS_SECRET", "jdnfksdmfksd") //this should be in an env file
+	atClaims := jwt.MapClaims{}
+	atClaims["authorized"] = true
+	atClaims["user_id"] = userId
+	atClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+	token, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
