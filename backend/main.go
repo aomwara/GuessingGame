@@ -14,9 +14,16 @@ import (
 )
 
 var (
-	route      = gin.Default()
-	RandNumber = rand.Intn(100)
-	status     = 200
+	route = gin.Default()
+
+	maxRand    = 5
+	RandNumber = rand.Intn(maxRand)
+	first      = 0
+	last       = 100
+
+	HTTPstatus = 0
+
+	token = 1
 )
 
 func main() {
@@ -24,6 +31,7 @@ func main() {
 	route.Use(cors.Default())
 
 	route.POST("/login", Login)
+	route.POST("/authCheck", authenCheck)
 	route.GET("/key", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"number": RandNumber,
@@ -31,23 +39,67 @@ func main() {
 	})
 	route.GET("/guess", Guess)
 
+	/* Middleware */
+	route.Use(MiddlewareAuthen())
+	{
+		route.GET("/middle", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"number": RandNumber,
+			})
+		})
+	}
+
 	log.Fatal(route.Run(":8080"))
 }
 
+func MiddlewareAuthen() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if token == 0 {
+			c.JSON(401, gin.H{
+				"message": "Unauthorized",
+			})
+			c.Abort()
+		} else {
+			c.Next()
+		}
+	}
+}
+
 func Guess(ctx *gin.Context) {
-	var guessNumber, err = strconv.Atoi(ctx.Query("guessNumber"))
+	var guessNumber, err = strconv.Atoi(ctx.Query("number"))
 	if err != nil {
 		return
 	}
 	if RandNumber == guessNumber {
-		status = 201
-		RandNumber = rand.Intn(5)
+		HTTPstatus = 201
+		ctx.JSON(HTTPstatus, gin.H{
+			"number":  guessNumber,
+			"status":  true,
+			"message": "Congratulations!",
+		})
+		RandNumber = rand.Intn(maxRand)
 	} else {
-		status = 202
+		HTTPstatus = 202
+		var message = ""
+		if guessNumber < RandNumber {
+			message = "is too low"
+			first = guessNumber
+		} else {
+			if last > maxRand {
+				last = maxRand
+			} else {
+				last = guessNumber
+			}
+			message = "is too high"
+		}
+		ctx.JSON(HTTPstatus, gin.H{
+			"number":  guessNumber,
+			"status":  false,
+			"first":   first,
+			"last":    last,
+			"message": message,
+		})
 	}
-	ctx.JSON(status, gin.H{
-		"guessNumber": guessNumber,
-	})
 }
 
 type User struct {
@@ -96,4 +148,18 @@ func CreateToken(userId uint64) (string, error) {
 		return "", err
 	}
 	return token, nil
+}
+
+func authenCheck(ctx *gin.Context) {
+	tokenString := ctx.Query("jwt_token")
+	claims := jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("ACCESS_SECRET")), nil
+	})
+
+	if err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, token.Valid)
 }
