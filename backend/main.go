@@ -37,9 +37,8 @@ func main() {
 			"number": RandNumber,
 		})
 	})
-	route.GET("/guess", Guess)
 
-	/* Middleware */
+	/* Use Middleware */
 	route.Use(MiddlewareAuthen())
 	{
 		route.GET("/middle", func(c *gin.Context) {
@@ -47,11 +46,13 @@ func main() {
 				"number": RandNumber,
 			})
 		})
+		route.GET("/guess", Guess)
 	}
 
 	log.Fatal(route.Run(":8080"))
 }
 
+/* Middleware Authentication Check */
 func MiddlewareAuthen() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if token == 0 {
