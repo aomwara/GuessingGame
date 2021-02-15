@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  frontend:
+    stdin_open: true
+    build:
+     context: ./frontend
+     dockerfile: Dockerfile
+    ports:
+     - "3000:3000"
+    volumes:
+     - "/app/node_modules"
+     - "./frontend:/app"
