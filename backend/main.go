@@ -22,7 +22,7 @@ func main() {
         vars := mux.Vars(r)
         title := vars["name"]
 
-        fmt.Fprintf(w, "<h1>Hello, %s!\n</h1>", title)
+        fmt.Fprintf(w, "<h1>Hello from go, %s!\n</h1>", title)
     })
 
     http.ListenAndServe(":80", r)
