@@ -5,41 +5,63 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	route = gin.Default()
+	route      = gin.Default()
+	RandNumber = rand.Intn(100)
+	status     = 200
 )
 
 func main() {
-	var number = rand.Intn(100)
+
+	route.Use(cors.Default())
 
 	route.POST("/login", Login)
-	route.GET("/getNumber", func(c *gin.Context) {
+	route.GET("/key", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"number": number,
+			"number": RandNumber,
 		})
-		number = rand.Intn(100)
 	})
+	route.GET("/guess", Guess)
 
 	log.Fatal(route.Run(":8080"))
+}
+
+func Guess(ctx *gin.Context) {
+	var guessNumber, err = strconv.Atoi(ctx.Query("guessNumber"))
+	if err != nil {
+		return
+	}
+	if RandNumber == guessNumber {
+		status = 201
+		RandNumber = rand.Intn(5)
+	} else {
+		status = 202
+	}
+	ctx.JSON(status, gin.H{
+		"guessNumber": guessNumber,
+	})
 }
 
 type User struct {
 	ID       uint64 `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Phone    string `json:"phone"`
+	Name     string `json:"name"`
 }
 
 var user = User{
 	ID:       1,
 	Username: "test",
 	Password: "testuser",
+	Name:     "Test User",
 }
 
 func Login(c *gin.Context) {
