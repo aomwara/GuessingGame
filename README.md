@@ -19,6 +19,7 @@ Task:
     - RESTful
     - Your response should be in form of JSON format
     - Responses should have CRUD functionality
+
 Bonus (for challenge):
 - FE
     - Use React.js context for authentication
