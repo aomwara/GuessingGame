@@ -1,6 +1,8 @@
 # GuessingGame
 Agoda/Intern/GuessingGame
 
+`WARANAT SUTTIKARN`
+
 Task:
 - FE
     - Login if not authenticated
