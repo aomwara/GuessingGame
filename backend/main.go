@@ -16,14 +16,13 @@ import (
 var (
 	route = gin.Default()
 
-	maxRand    = 5
+	maxRand    = 100
 	RandNumber = rand.Intn(maxRand)
 	first      = 0
 	last       = 100
 
 	HTTPstatus = 0
-
-	token = 1
+	authStatus bool
 )
 
 func main() {
@@ -31,17 +30,11 @@ func main() {
 	route.Use(cors.Default())
 
 	route.POST("/login", Login)
-	route.POST("/authCheck", authenCheck)
-	route.GET("/key", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"number": RandNumber,
-		})
-	})
 
 	/* Use Middleware */
 	route.Use(MiddlewareAuthen())
 	{
-		route.GET("/middle", func(c *gin.Context) {
+		route.GET("/key", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
 				"number": RandNumber,
 			})
@@ -55,13 +48,25 @@ func main() {
 /* Middleware Authentication Check */
 func MiddlewareAuthen() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if token == 0 {
-			c.JSON(401, gin.H{
+		var tokenString = c.Request.Header.Get("Token")
+		if tokenString == "" {
+			c.AbortWithStatusJSON(401, gin.H{
 				"message": "Unauthorized",
 			})
-			c.Abort()
 		} else {
-			c.Next()
+			claims := jwt.MapClaims{}
+			_token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+				return []byte(os.Getenv("ACCESS_SECRET")), nil
+			})
+			if err != nil {
+				c.AbortWithStatusJSON(401, gin.H{
+					"message": "Unauthorized",
+				})
+				authStatus = false
+			} else {
+				authStatus = _token.Valid
+				c.Next()
+			}
 		}
 	}
 }
@@ -69,8 +74,12 @@ func MiddlewareAuthen() gin.HandlerFunc {
 func Guess(ctx *gin.Context) {
 	var guessNumber, err = strconv.Atoi(ctx.Query("number"))
 	if err != nil {
+		ctx.JSON(203, gin.H{
+			"message": "Not have parameter",
+		})
 		return
 	}
+
 	if RandNumber == guessNumber {
 		HTTPstatus = 201
 		ctx.JSON(HTTPstatus, gin.H{
@@ -103,20 +112,6 @@ func Guess(ctx *gin.Context) {
 	}
 }
 
-type User struct {
-	ID       uint64 `json:"id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
-}
-
-var user = User{
-	ID:       1,
-	Username: "test",
-	Password: "testuser",
-	Name:     "Test User",
-}
-
 func Login(c *gin.Context) {
 	var u User
 	if err := c.ShouldBindJSON(&u); err != nil {
@@ -138,7 +133,6 @@ func Login(c *gin.Context) {
 
 func CreateToken(userId uint64) (string, error) {
 	var err error
-	os.Setenv("ACCESS_SECRET", "jdnfksdmfksd") //this should be in an env file
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims["user_id"] = userId
@@ -151,16 +145,17 @@ func CreateToken(userId uint64) (string, error) {
 	return token, nil
 }
 
-func authenCheck(ctx *gin.Context) {
-	tokenString := ctx.Query("jwt_token")
-	claims := jwt.MapClaims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("ACCESS_SECRET")), nil
-	})
+type User struct {
+	ID       uint64 `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+}
 
-	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, err.Error())
-		return
-	}
-	ctx.JSON(http.StatusOK, token.Valid)
+/* test-user */
+var user = User{
+	ID:       1,
+	Username: "test",
+	Password: "testuser",
+	Name:     "Test User",
 }
