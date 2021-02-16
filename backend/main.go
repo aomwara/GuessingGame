@@ -26,8 +26,17 @@ var (
 )
 
 func main() {
-
-	route.Use(cors.Default())
+	route.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"POST", "GET"},
+		AllowHeaders:     []string{"Origin", "Token"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "http://localhost:3000"
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 
 	route.POST("/login", Login)
 	route.GET("/authCheck", VerifyToken)
@@ -41,6 +50,11 @@ func main() {
 			})
 		})
 		route.GET("/guess", Guess)
+		route.GET("/test", func(c *gin.Context) {
+			c.JSON(200, gin.H{
+				"message": "Accept!",
+			})
+		})
 	}
 
 	log.Fatal(route.Run(":8080"))
