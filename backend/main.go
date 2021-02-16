@@ -30,6 +30,7 @@ func main() {
 	route.Use(cors.Default())
 
 	route.POST("/login", Login)
+	route.GET("/authCheck", VerifyToken)
 
 	/* Use Middleware */
 	route.Use(MiddlewareAuthen())
@@ -143,6 +144,31 @@ func CreateToken(userId uint64) (string, error) {
 		return "", err
 	}
 	return token, nil
+}
+
+func VerifyToken(ctx *gin.Context) {
+	var tokenString = ctx.Request.Header.Get("Token")
+	if tokenString == "" {
+		ctx.AbortWithStatusJSON(401, gin.H{
+			"message": "Unauthorized",
+		})
+	} else {
+		claims := jwt.MapClaims{}
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("ACCESS_SECRET")), nil
+		})
+		if err != nil {
+			ctx.JSON(401, gin.H{
+				"message": "Unauthorized",
+				"status":  false,
+			})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{
+				"message": "Authorized",
+				"status":  token.Valid,
+			})
+		}
+	}
 }
 
 type User struct {
