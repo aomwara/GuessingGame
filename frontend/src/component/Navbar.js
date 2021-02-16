@@ -1,9 +1,19 @@
 import React from 'react';
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
-import NavDropdown from 'react-bootstrap/NavDropdown'
+import useToken from './useToken';
+import logout from './logout'
 
 export default function NavbarComponent() {
+    const { token } = useToken();
+    var text = ""
+   
+    if(token != ""){
+        text = "logout"
+    }else{
+        text = "login"
+    }
+
   return(
       <div>
         <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
@@ -12,7 +22,7 @@ export default function NavbarComponent() {
             <Navbar.Collapse id="responsive-navbar-nav">
                 <Nav className="mr-auto"></Nav>
                 <Nav>
-                <Nav.Link href="#deets">Login</Nav.Link>
+                <Nav.Link onClick={logout}>{text}</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
         </Navbar>

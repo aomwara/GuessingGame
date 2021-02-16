@@ -1,7 +1,15 @@
 import React from 'react';
+import NavbarComponent from './Navbar'
 
 export default function Guess() {
   return(
-    <h2>Guessing Game Page</h2>
+    <div>
+        <NavbarComponent></NavbarComponent>
+        <div className="login-padding"></div>
+        <center>
+            <h2>Guessing Game Page</h2>
+        </center>
+    </div>
+    
   );
 }
