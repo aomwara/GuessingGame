@@ -4,14 +4,23 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import React, { useState } from 'react';
 import useToken from './component/useToken';
+import authCheck from './component/authCheck'
 
 import Guess from './component/Guess';
 import Login from './component/Login'
 
 function App() {
   const { token, setToken } = useToken();
+  var statusAuth = 0
+  console.log("be-> "+statusAuth)
 
-  if(!token || token=="Please provide valid login details") {
+  authCheck(token).then(status => {
+    statusAuth = status
+    console.log("inf =>"+ statusAuth)
+  });
+
+  console.log("af-> "+statusAuth)
+  if(!token || statusAuth) {
     return <Login setToken={setToken} />
   }
 
