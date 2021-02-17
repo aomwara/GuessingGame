@@ -4,15 +4,9 @@ async function authChecker(token) {
       headers: {
         'Token': token
       },
-      credentials: 'same-origin',
     }).then(response => response.json())
     .then((responseData) => {
-        //return responseData
-        if(responseData.status == "true"){
-            return 0
-        }else{
-            return 1
-        }
+        return responseData.status
     })
 }
 export default authChecker

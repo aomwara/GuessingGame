@@ -3,5 +3,5 @@ import  { Redirect } from 'react-router-dom'
 
 export default function logout(){
     localStorage.clear()
-    return <Redirect to="/"></Redirect>
+    window.location.reload(false);
 }

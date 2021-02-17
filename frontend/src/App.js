@@ -2,7 +2,8 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import React, { useState } from 'react';
+import { Redirect } from 'react-router'
+import React, { useState, useEffect } from 'react';
 import useToken from './component/useToken';
 import authCheck from './component/authCheck'
 
@@ -11,33 +12,39 @@ import Login from './component/Login'
 
 function App() {
   const { token, setToken } = useToken();
-  var statusAuth = 0
-  console.log("be-> "+statusAuth)
+  const [isAuth, setAuth] = useState(0);
 
-  authCheck(token).then(status => {
-    statusAuth = status
-    console.log("inf =>"+ statusAuth)
-  });
+  useEffect(() => {
+    fetch('http://localhost:8080/authCheck', {
+      method: 'GET',
+      headers: {
+        'Token': token
+      },
+    }).then(response => response.json())
+    .then((responseData) => {
+        setAuth(responseData.status)
+    })
+  }, []);
 
-  console.log("af-> "+statusAuth)
-  if(!token || statusAuth) {
-    return <Login setToken={setToken} />
+  if(!token || !isAuth){
+    return <Login setToken={setToken} setAuth={setAuth}/>
   }
+  
+    return (
+      <div className="wrapper">
+        <BrowserRouter>
+          <Switch>
+            <Route exact path="/">
+                <Redirect to="/guess" />
+            </Route>
+            <Route path="/guess">
+              <Guess />
+            </Route>
+          </Switch>
+        </BrowserRouter>
+      </div>
+    );
 
-  return (
-    <div className="wrapper">
-      <BrowserRouter>
-        <Switch>
-          <Route path="/">
-            <Guess />
-          </Route>
-          <Route path="/guess">
-            <Guess />
-          </Route>
-        </Switch>
-      </BrowserRouter>
-    </div>
-  );
 }
 
 export default App;

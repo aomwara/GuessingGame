@@ -32,6 +32,7 @@ export default function Login({ setToken }) {
       password
     });
     setToken(token);
+    window.location.reload(false);
     console.log(token)
   }
 
@@ -61,5 +62,5 @@ export default function Login({ setToken }) {
 }
 
 Login.propTypes = {
-  setToken: PropTypes.func.isRequired
+  setToken: PropTypes.func.isRequired,
 }
