@@ -28,6 +28,12 @@ export default function Guess() {
   const [hint, setHint] = useState();
 
   const handleGuess = async e => {
+    if(buttonTxt == "New Game!"){
+      setButton("Guess Now!")
+      setNumber(0)
+      setHidden("d-none")
+    }
+
     e.preventDefault();
     const respMessage = await guessSend(number);
     if(respMessage.status){
@@ -35,10 +41,13 @@ export default function Guess() {
       setAlert("success")
       setHint("")
     }else{
+      setAlert("warning")
       setHint(" | Range "+respMessage.first+" to "+respMessage.last)
-      setHidden("")
-      setMessage(respMessage.number+" "+respMessage.message);
     }
+      //setAlert("warning")
+      setHidden("")
+      setNumber(0)
+      setMessage(respMessage.number+" "+respMessage.message);
   }
 
   return(

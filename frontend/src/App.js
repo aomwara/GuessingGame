@@ -15,7 +15,7 @@ function App() {
   const [isAuth, setAuth] = useState(0);
 
   useEffect(() => {
-    fetch('http://localhost:8080/authCheck', {
+    fetch('http://localhost:8888/authCheck', {
       method: 'GET',
       headers: {
         'Token': token
