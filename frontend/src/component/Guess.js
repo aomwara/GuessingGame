@@ -50,6 +50,7 @@ export default function Guess() {
               </Row>
               <br />
               {message}
+              <br />
 
               <Button variant="primary" type="submit">
               Guess Now
