@@ -9,10 +9,10 @@ Agoda Internship Assignment w/ WARANAT SUTTIKARN (AOM)
 - Step 3
 `docker-compose up -d`
 
-## Web for Test (only localhost)
+## Web for Test (only for localhost)
 - Frontend `http://localhost:3000`
 - Backend `http://localhost:8888`
 
 ## User for Test
-- Username : 'test'
-- Password : 'testuser'
+- Username : test
+- Password : testuser
