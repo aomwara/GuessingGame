@@ -9,7 +9,7 @@ import '../App.css'
 import Container from 'react-bootstrap/Container'
 
 async function loginUser(credentials) {
-    return fetch('http://localhost:8888/login', {
+    return fetch('http://localhost:8889/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

@@ -18,5 +18,5 @@ services:
      context: ./backend
      dockerfile: Dockerfile
     ports:
-     - "8888:8080"
+     - "8889:8080"
     restart: unless-stopped

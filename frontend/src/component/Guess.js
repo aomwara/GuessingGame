@@ -7,7 +7,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
 async function guessSend(number) {
-  return fetch('http://localhost:8888/guess?number='+number, {
+  return fetch('http://localhost:8889/guess?number='+number, {
     method: 'GET',
     headers: {
       'Token' : localStorage.getItem('token'),
