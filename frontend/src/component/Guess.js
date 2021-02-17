@@ -22,11 +22,23 @@ async function guessSend(number) {
 export default function Guess() {
   const [number, setNumber] = useState();
   const [message, setMessage] = useState();
+  const [buttonTxt = "Guess Now!", setButton] = useState();
+  const [alertType = "warning", setAlert] = useState();
+  const [hidden = "d-none", setHidden] = useState();
+  const [hint, setHint] = useState();
 
   const handleGuess = async e => {
     e.preventDefault();
     const respMessage = await guessSend(number);
-    setMessage(respMessage.message);
+    if(respMessage.status){
+      setButton("New Game!")
+      setAlert("success")
+      setHint("")
+    }else{
+      setHint(" | Range "+respMessage.first+" to "+respMessage.last)
+      setHidden("")
+      setMessage(respMessage.number+" "+respMessage.message);
+    }
   }
 
   return(
@@ -45,16 +57,20 @@ export default function Guess() {
             <Form onSubmit={handleGuess}>
               <Row className="justify-content-md-center">
                 <Col md="auto">
-                  <Form.Control size="lg" type="number" placeholder="Guess Number" onChange={e => setNumber(e.target.value)}/>
+                  <Form.Control size="lg" autoFocus type="number" placeholder="Guess Number" onChange={e => setNumber(e.target.value)}/> 
+                </Col>
+                <Col md='auto'>
+                  <Button variant="primary" type="submit">
+                    {buttonTxt}
+                  </Button>
                 </Col>
               </Row>
-              <br />
-              {message}
-              <br />
-
-              <Button variant="primary" type="submit">
-              Guess Now
-            </Button>
+              <br/>
+              <Row className="justify-content-md-center">
+                <Col md='auto'>
+                  <Alert className={hidden} variant={alertType}>{message}{hint}</Alert>
+                </Col>
+              </Row>
             </Form>
 
            

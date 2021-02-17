@@ -103,6 +103,8 @@ func Guess(ctx *gin.Context) {
 			"message": "Congratulations!",
 		})
 		RandNumber = rand.Intn(maxRand)
+		first = 0
+		last = 100
 	} else {
 		HTTPstatus = 202
 		var message = ""
