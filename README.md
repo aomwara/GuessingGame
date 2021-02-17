@@ -1,7 +1,7 @@
 # GuessingGame
 Agoda Internship Assignment w/ WARANAT SUTTIKARN (AOM)
 
-## How to setup
+## How to run setup
 - Step 1
 `git clone https://github.com/waranatcpe/GuessingGame.git`
 - Step 2 
