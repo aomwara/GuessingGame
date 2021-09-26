@@ -1,5 +1,4 @@
 # GuessingGame
-Agoda Internship Assignment w/ WARANAT SUTTIKARN (AOM)
 
 ## How to run setup
 - Step 1
