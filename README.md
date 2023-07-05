@@ -14,4 +14,4 @@
 
 ## User for Test
 - Username : test
-- Password : testuser
+- Password : testuse
